@@ -46,7 +46,7 @@ function! gutentags#ctags#init(project_root) abort
     " Check the old name for this option, too, before falling back to the
     " globally defined name.
     let l:tagfile = getbufvar("", 'gutentags_ctags_tagfile',
-                \getbufvar("", 'gutentags_tagfile', 
+                \getbufvar("", 'gutentags_tagfile',
                 \g:gutentags_ctags_tagfile))
     let b:gutentags_files['ctags'] = gutentags#get_cachefile(
                 \a:project_root, l:tagfile)
@@ -92,7 +92,7 @@ function! gutentags#ctags#generate(proj_dir, tags_file, gen_opts) abort
         "
         " Note that if we don't do this and pass a full path for the project
         " root, some `ctags` implementations like Exhuberant Ctags can get
-        " confused if the paths have spaces -- but not if you're *in* the root 
+        " confused if the paths have spaces -- but not if you're *in* the root
         " directory, for some reason... (which we are, our caller in
         " `autoload/gutentags.vim` changed it).
         let l:actual_proj_dir = '.'
@@ -179,7 +179,10 @@ endfunction
 function! gutentags#ctags#on_job_exit(job, exit_val) abort
     call gutentags#remove_job_by_data('ctags', a:job)
 
+    " Skip reporting exit codes during exiting of Neovim.
+    " This would report e.g. 141 (for SIGPIPE) since version 0.4.
     if a:exit_val != 0
+            \ && (!exists('v:exiting') || v:exiting is v:null)
         call gutentags#warning("ctags job failed, returned: ".
                     \string(a:exit_val))
     endif
@@ -211,7 +214,7 @@ function! s:generate_wildignore_options() abort
         if empty(g:gutentags_cache_dir)
             let s:wildignores_options_path = tempname()
         else
-            let s:wildignores_options_path = 
+            let s:wildignores_options_path =
                         \gutentags#stripslash(g:gutentags_cache_dir).
                         \'/_wildignore.options'
         endif
